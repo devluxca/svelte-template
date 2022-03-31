@@ -1,5 +1,5 @@
 <script>
-	import { Styles, Container, Row, Col, Card, Button, Input, Label } from 'sveltestrap'
+	import { Styles, Container, Row, Col, Card, Button, Input, Label, Icon } from 'sveltestrap'
 	import { liveQuery } from 'dexie'
 
 	import { isArray } from '$utils'
@@ -16,6 +16,7 @@
 
 	  setName('')
 	}
+	const deleteTodo = async (id) => await db.todos.delete(id)
 
 	const setterName = ({ target: { value }}) => setName(value)
 
@@ -34,7 +35,7 @@
 		<Row noGutters class="justify-content-center">
 			<Col sm={{ size: 6 }}>
 				<Label for="todoText">Quais tarefas temos pra hoje?</Label>
-				<Input type="textarea" name="text" id="todoText" on:keyup={setterName} />
+				<Input value={$name} type="textarea" name="text" id="todoText" on:keyup={setterName} />
 			</Col>
 		</Row>
 		<Row noGutters class="mb-5 justify-content-center mt-4">
@@ -47,7 +48,18 @@
 			<Col sm={{ size: 4 }}>
 				{#if isArray($todos)}
 					{#each $todos as todo}
-						<Card body>{todo.name}</Card>
+						<Card body class="mb-2">
+							<Row>
+								<Col sm={10}>
+									<p class="todo-name">{todo.name}</p>
+								</Col>
+								<Col sm={2}>
+									<div class="icon-delete-button" on:click={deleteTodo(todo.id)}>
+										<Icon name="trash-fill" />
+									</div>
+								</Col>
+							</Row>
+						</Card>
 					{/each}
 				{/if}
 			</Col>
@@ -74,5 +86,15 @@
 		main {
 			max-width: none;
 		}
+	}
+
+	.todo-name {
+		display: flex;
+		margin: 0px;
+		padding: 0px;
+	}
+	
+	.icon-delete-button {
+		cursor: pointer;
 	}
 </style>
