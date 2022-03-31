@@ -4,11 +4,16 @@ import resolve from '@rollup/plugin-node-resolve'
 import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
+import alias from '@rollup/plugin-alias'
+import json from '@rollup/plugin-json'
+import injectProcessEnv from 'rollup-plugin-inject-process-env'
 
 import preprocess from 'svelte-preprocess'
 import autoprefixer from 'autoprefixer'
 
-const production = !process.env.ROLLUP_WATCH
+import * as path from 'path'
+
+const PRODUCTION = !process.env.ROLLUP_WATCH
 
 function serve () {
   // eslint-disable-next-line immutable/no-let
@@ -45,36 +50,41 @@ export default {
       preprocess: preprocess({ postCss: [autoprefixer()] }),
       emitCss: true,
       compilerOptions: {
-        // enable run-time checks when not in production
-        dev: !production,
+        dev: !PRODUCTION,
       },
     }),
-    // we'll extract any component CSS out into
-    // a separate file - better for performance
     css({ output: 'bundle.css' }),
-
-    // If you have external dependencies installed from
-    // npm, you'll most likely need these plugins. In
-    // some cases you'll need additional configuration -
-    // consult the documentation for details:
-    // https://github.com/rollup/plugins/tree/master/packages/commonjs
+    alias({
+      entries: [
+        { find: '$utils', replacement: path.resolve(__dirname, 'src', 'utils') },
+        { find: '$lib', replacement: path.resolve(__dirname, 'src', 'library') },
+        { find: '$service', replacement: path.resolve(__dirname, 'src', 'services') },
+      ],
+    }),
     resolve({
       browser: true,
       dedupe: ['svelte'],
     }),
     commonjs(),
+    json(),
+    injectProcessEnv({
+      NODE_ENV: PRODUCTION
+        ? 'production'
+        : 'development',
+	    DB_NAME: 'myappdb',
+    }),
 
     // In dev mode, call `npm run start` once
     // the bundle has been generated
-    !production && serve(),
+    !PRODUCTION && serve(),
 
     // Watch the `public` directory and refresh the
     // browser on changes when not in production
-    !production && livereload('public'),
+    !PRODUCTION && livereload('public'),
 
     // If we're building for production (npm run build
     // instead of npm run dev), minify
-    production && terser(),
+    PRODUCTION && terser(),
   ],
   watch: {
     clearScreen: false,

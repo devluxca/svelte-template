@@ -16,7 +16,6 @@
         "svelte3",
         "ramda",
         "no-loops",
-        "immutable"
     ],
     "rules": {
         "no-loops/no-loops": 2,
@@ -39,7 +38,6 @@
                 "import/no-duplicates": "off",
                 "import/no-mutable-exports": "off",
                 "import/no-unresolved": "off",
-                "immutable/no-let": "off",
                 "no-multiple-empty-lines": "off",
                 "no-undef": "off",
                 "no-unused-vars": "off"
